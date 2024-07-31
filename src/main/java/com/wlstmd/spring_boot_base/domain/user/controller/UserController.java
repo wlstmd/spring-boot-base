@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -17,15 +19,13 @@ public class UserController {
 
     @PostMapping("/signup")
     @Operation(summary = "회원가입", description = "회원가입 API")
-    public ResponseEntity<String> signUp(@RequestBody UserDto.SignUp signUpDto) {
-        userService.signUp(signUpDto);
-        return ResponseEntity.ok("회원가입이 완료되었습니다.");
+    public ResponseEntity<Map<String, String>> signUp(@RequestBody UserDto.SignUp signUpDto) {
+        return ResponseEntity.ok(userService.signUp(signUpDto));
     }
 
     @PostMapping("/signin")
     @Operation(summary = "로그인", description = "로그인 API")
-    public ResponseEntity<String> signIn(@RequestBody UserDto.SignIn signInDto) {
-        String token = userService.signIn(signInDto);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<Map<String, String>> signIn(@RequestBody UserDto.SignIn signInDto) {
+        return ResponseEntity.ok(userService.signIn(signInDto));
     }
 }

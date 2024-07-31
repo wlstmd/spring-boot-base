@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -17,7 +20,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public void signUp(UserDto.SignUp signUpDto) {
+    public Map<String, String> signUp(UserDto.SignUp signUpDto) {
         if (userRepository.existsByEmail(signUpDto.getEmail())) {
             throw new BusinessException(ErrorCode.EMAIL_DUPLICATION);
         }
@@ -28,9 +31,13 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
 
         userRepository.save(user);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "회원가입이 완료되었습니다.");
+        return response;
     }
 
-    public String signIn(UserDto.SignIn signInDto) {
+    public Map<String, String> signIn(UserDto.SignIn signInDto) {
         User user = userRepository.findByEmail(signInDto.getEmail())
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -38,6 +45,14 @@ public class UserService {
             throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
 
-        return jwtTokenProvider.createToken(user.getEmail());
+        String accessToken = jwtTokenProvider.createAccessToken(user.getEmail());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "로그인이 성공적으로 되었습니다.");
+        response.put("accessToken", accessToken);
+        response.put("refreshToken", refreshToken);
+
+        return response;
     }
 }

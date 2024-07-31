@@ -15,12 +15,23 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration}")
-    private int jwtExpirationMs;
+    @Value("${jwt.accessToken.expiration}")
+    private int jwtAccessTokenExpirationMs;
 
-    public String createToken(String email) {
+    @Value("${jwt.refreshToken.expiration}")
+    private int jwtRefreshTokenExpirationMs;
+
+    public String createAccessToken(String email) {
+        return createToken(email, jwtAccessTokenExpirationMs);
+    }
+
+    public String createRefreshToken(String email) {
+        return createToken(email, jwtRefreshTokenExpirationMs);
+    }
+
+    private String createToken(String email, int expirationMs) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+        Date expiryDate = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .setSubject(email)
